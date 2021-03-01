@@ -77,8 +77,8 @@ class TaoTracker(object):
                 self.tracklets[id]['bboxes'].append(bbox)
                 self.tracklets[id]['labels'].append(label)
                 self.tracklets[id]['embeds'] = (
-                    1 - self.momentum_embed
-                ) * self.tracklets[id]['embeds'] + self.momentum_embed * embed
+                                                       1 - self.momentum_embed
+                                               ) * self.tracklets[id]['embeds'] + self.momentum_embed * embed
                 self.tracklets[id]['frame_ids'].append(frame_id)
             else:
                 self.tracklets[id] = dict(
@@ -142,7 +142,7 @@ class TaoTracker(object):
             as_tuple=False).squeeze(1)
         cat_same = labels[low_inds].view(-1, 1) == labels.view(1, -1)
         ious = bbox_overlaps(bboxes[low_inds, :-1], bboxes[:, :-1])
-        ious *= cat_same
+        ious *= cat_same.to(ious.device)
         for i, ind in enumerate(low_inds):
             if (ious[i, :ind] > self.distractor_nms_thr).any():
                 valid_inds[ind] = False
@@ -162,12 +162,12 @@ class TaoTracker(object):
                     temperature=temperature,
                     transpose=True)
                 cat_same = labels.view(-1, 1) == memo_labels.view(1, -1)
-                exps = torch.exp(sims) * cat_same
+                exps = torch.exp(sims) * cat_same.to(sims.device)
                 d2t_scores = exps / (exps.sum(dim=1).view(-1, 1) + 1e-6)
                 t2d_scores = exps / (exps.sum(dim=0).view(1, -1) + 1e-6)
                 cos_scores = cal_similarity(
                     embeds, memo_embeds, method='cosine', transpose=True)
-                cos_scores *= cat_same
+                cos_scores *= cat_same.to(cos_scores.device)
                 scores = (d2t_scores + t2d_scores) / 2
                 if self.match_with_cosine:
                     scores = (scores + cos_scores) / 2
@@ -175,7 +175,7 @@ class TaoTracker(object):
                 cos_scores = cal_similarity(
                     embeds, memo_embeds, method='cosine', transpose=True)
                 cat_same = labels.view(-1, 1) == memo_labels.view(1, -1)
-                scores = cos_scores * cat_same.float()
+                scores = cos_scores * cat_same.float().to(cos_scores.device)
             else:
                 raise NotImplementedError()
             if 'metas' in kwargs:
@@ -199,7 +199,7 @@ class TaoTracker(object):
                     scores[i + 1:, memo_ind] = 0
                     m = self.momentum_obj_score
                     bboxes[i, -1] = m * bboxes[i, -1] + (
-                        1 - m) * memo_bboxes[memo_ind, -1]
+                            1 - m) * memo_bboxes[memo_ind, -1]
         else:
             ids = torch.full((bboxes.size(0), ), -1, dtype=torch.long)
         # init tracklets
@@ -225,7 +225,7 @@ class TaoTracker(object):
 
             ious = bbox_overlaps(bboxes[:, :4], gt_bboxes[:, :4])
             same_cat = labels.view(-1, 1) == gt_labels.view(1, -1)
-            ious *= same_cat.float()
+            ious *= same_cat.float().to(ious.device)
 
             gt_inds = torch.full(ids.size(), -1, dtype=torch.long)
             for i, bbox in enumerate(bboxes):
