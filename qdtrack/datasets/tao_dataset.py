@@ -103,7 +103,10 @@ class TaoDataset(CocoVideoDataset):
                         data['image_id'] = img_id
                         data['bbox'] = self.xyxy2xywh(bboxes[i, 1:])
                         data['score'] = float(bboxes[i][-1])
-                        data['category_id'] = self.cat_ids[label]
+                        if len(result) == 1230:
+                            data['category_id'] = label
+                        else:
+                            data['category_id'] = self.cat_ids[label]
                         data['video_id'] = img_info['video_id']
                         data['track_id'] = max_track_id + int(bboxes[i][0])
                         track_ids.append(int(bboxes[i][0]))
@@ -111,6 +114,27 @@ class TaoDataset(CocoVideoDataset):
             track_ids = list(set(track_ids))
             max_track_id += max(track_ids) + 1
 
+        return json_results
+
+    def _det2json(self, results):
+        """Convert detection results to COCO json style."""
+        json_results = []
+        for idx in range(len(self)):
+            img_id = self.img_ids[idx]
+            result = results[idx]
+            for label in range(len(result)):
+                bboxes = result[label]
+                for i in range(bboxes.shape[0]):
+                    data = dict()
+                    data['image_id'] = img_id
+                    data['bbox'] = self.xyxy2xywh(bboxes[i])
+                    data['score'] = float(bboxes[i][4])
+                    # if the object detecor is trained on 1230 classes(lvis 0.5).
+                    if len(result) == 1230:
+                        data['category_id'] = label
+                    else:
+                        data['category_id'] = self.cat_ids[label]
+                    json_results.append(data)
         return json_results
 
     def format_results(self, results, resfile_path=None):

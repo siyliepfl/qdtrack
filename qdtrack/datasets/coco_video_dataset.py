@@ -125,6 +125,7 @@ class CocoVideoDataset(CocoDataset):
         return results, ref_results
 
     def _match_gts(self, ann, ref_ann):
+
         if ann.get('instance_ids', False):
             ins_ids = list(ann['instance_ids'])
             ref_ins_ids = list(ref_ann['instance_ids'])
@@ -203,8 +204,11 @@ class CocoVideoDataset(CocoDataset):
                 gt_labels.append(self.cat2label[ann['category_id']])
                 if ann.get('segmentation', False):
                     gt_masks_ann.append(ann['segmentation'])
-                if ann.get('instance_id', False):
+                # Bug when instance_id == 0, it will fail.
+                instance_id = ann.get('instance_id', None)
+                if instance_id is not None:
                     gt_instance_ids.append(ann['instance_id'])
+
 
         if gt_bboxes:
             gt_bboxes = np.array(gt_bboxes, dtype=np.float32)
