@@ -245,7 +245,7 @@ log_config = dict(
 # yapf:enable
 # runtime settings
 total_epochs = 24
-dist_params = dict(backend='nccl', port='12340')
+dist_params = dict(backend='nccl')
 log_level = 'INFO'
 load_from = None
 resume_from = None
