@@ -81,7 +81,7 @@ class QuasiDenseFasterRCNN(TwoStageDetector):
 
         return losses
 
-    def simple_test(self, img, img_metas, rescale=False):
+    def simple_test(self, img, img_metas, detection_only=False,rescale=False):
         # TODO inherit from a base tracker
         assert self.roi_head.with_track, 'Track head must be implemented.'
         frame_id = img_metas[0].get('frame_id', -1)
@@ -93,7 +93,7 @@ class QuasiDenseFasterRCNN(TwoStageDetector):
         det_bboxes, det_labels, track_feats = self.roi_head.simple_test(
             x, img_metas, proposal_list, rescale)
 
-        if track_feats is not None:
+        if track_feats is not None and not detection_only:
             bboxes, labels, ids = self.tracker.match(
                 bboxes=det_bboxes,
                 labels=det_labels,
@@ -103,7 +103,7 @@ class QuasiDenseFasterRCNN(TwoStageDetector):
         bbox_result = bbox2result(det_bboxes, det_labels,
                                   self.roi_head.bbox_head.num_classes)
 
-        if track_feats is not None:
+        if track_feats is not None and not detection_only:
             track_result = track2result(bboxes, labels, ids,
                                         self.roi_head.bbox_head.num_classes)
         else:
