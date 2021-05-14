@@ -14,8 +14,13 @@ On the offical download page, the required data and annotations are
 - `tracking` set images: `MOT 2020 Data`
 - `tracking` set annotations: `MOT 2020 Labels`
 
+#### Download TAO
+Please follow [TAO download](https://github.com/TAO-Dataset/tao/blob/master/docs/download.md) instructions. 
+
+
 #### Convert annotations
 
+##### BDD100K
 To organize the annotations for training and inference, we implement a [dataset API](../qdtrack/datasets/parsers/coco_video_parser.py) that is similiar to COCO-style.
 
 After downloaded the annotations, please transform the offical annotation files to CocoVID style with the provided [scripts](../tools/convert_datasets).
@@ -35,6 +40,13 @@ python -m bdd100k.label.to_coco -m box_track -l bdd100k/labels/box_track_20/${SE
 ```
 
 The `${SET_NAME}` here can be one of ['train', 'val'].
+
+##### TAO
+You should first install [TAO toolkit](https://github.com/TAO-Dataset/tao)
+To convert the TAO set. You can do as:
+```bash
+python tools/tao2coco.py -tao data/tao/annotations/ 
+```
 
 #### Symlink the data
 
@@ -58,6 +70,12 @@ Our folder structure follows
 │   │   ├── labels 
 │   │   │   ├── box_track_20
 │   │   │   ├── det_20
+    ├── tao
+        ├── frames
+            ├── train
+            ├── val
+            ├── test
+        ├── annotations
 
 ```
 

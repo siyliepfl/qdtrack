@@ -58,6 +58,9 @@ Please refer to [GET_STARTED.md](docs/GET_STARTED.md) for dataset preparation an
 
 We release [pretrained models](https://drive.google.com/file/d/1YNAQgd8rMqqEG-fRj3VWlO4G5kdwJbxz/view?usp=sharing) on BDD100K dataset for testing.
 
+**New**: 
+We release the [pretrained models](https://drive.google.com/file/d/1k8-QOEQ-xiEq6RB384VTSY6FyX2DSYNJ/view) on TAO.
+
 More implementations / models on the following benchmarks will be released later:
 
 - Waymo
